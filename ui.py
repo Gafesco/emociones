@@ -54,21 +54,10 @@ def _url_activity(item):
         return item["url"]
     return _gg_url(_label_of(item))
 
-
 # =======================
 #  BOTÓN REDONDEADO (Canvas)
 # =======================
 class RoundedButton(tk.Canvas):
-    """
-    Botón redondeado con sombra y hover (sin dependencias externas).
-    - text: texto a mostrar
-    - command: callback
-    - fill/hover_fill: colores del botón
-    - fg: color de texto
-    - container_bg: color del contenedor (para integrar el canvas)
-    - radius: radio
-    - pad_x/pad_y: padding
-    """
     def __init__(self, master, text, command=None,
                  fill=PALETTE["btn_pri"], hover_fill=PALETTE["btn_pri_h"],
                  fg="#FFFFFF", container_bg=PALETTE["card"],
@@ -86,24 +75,19 @@ class RoundedButton(tk.Canvas):
         self.shadow = shadow
         self.text_value = text
 
-        # medir texto para tamaño mínimo
         tmp = tk.Label(self, text=text, font=font)
         tmp.update_idletasks()
         w = tmp.winfo_reqwidth() + pad_x * 2
         h = tmp.winfo_reqheight() + pad_y * 2
         tmp.destroy()
 
-        self.configure(width=w + 8, height=h + 8)  # + sombra
-
+        self.configure(width=w + 8, height=h + 8)
         self._draw(self.fill)
-
-        # eventos
         self.bind("<Enter>", lambda e: self._draw(self.hover_fill))
         self.bind("<Leave>", lambda e: self._draw(self.fill))
         self.bind("<Button-1>", self._on_click)
 
     def _round_rect(self, x1, y1, x2, y2, r, **kwargs):
-        # rectángulo redondeado aproximado con polygon + smooth
         points = [
             x1+r, y1, x2-r, y1, x2, y1, x2, y1+r,
             x2, y2-r, x2, y2, x2-r, y2, x1+r, y2,
@@ -115,18 +99,14 @@ class RoundedButton(tk.Canvas):
         self.delete("all")
         w = self.winfo_reqwidth()
         h = self.winfo_reqheight()
-        # sombra
         if self.shadow:
             self._round_rect(5, 5, w-1, h-1, self.radius, fill=PALETTE["shadow"], outline="")
-        # botón
         self._round_rect(2, 2, w-4, h-4, self.radius, fill=fill_color, outline="")
-        # texto
         self.create_text(w//2, h//2, text=self.text_value, fill=self.fg, font=self.font)
 
     def _on_click(self, _):
         if callable(self.command):
             self.command()
-
 
 # =======================
 #       ESTILOS TTK
@@ -142,10 +122,10 @@ def _init_styles():
     style.configure("Header.TFrame", background=PALETTE["accent"])
     style.configure("Body.TFrame",   background=PALETTE["bg"])
     style.configure("Card.TFrame",   background=PALETTE["card"], borderwidth=1, relief="flat")
-    style.configure("CardPad.TFrame",background=PALETTE["bg"])  # wrapper para sombra
+    style.configure("CardPad.TFrame",background=PALETTE["bg"])
 
     style.configure("Header.TLabel", background=PALETTE["accent"], foreground="#FFFFFF",
-                    font=("Segoe UI", 22, "bold"))  # más grande
+                    font=("Segoe UI", 22, "bold"))
 
     style.configure("H2.TLabel",     background=PALETTE["card"], foreground=PALETTE["text"],
                     font=("Segoe UI Semibold", 16))
@@ -159,7 +139,6 @@ def _init_styles():
                     background=PALETTE["accent_2"],
                     arrowcolor="#FFFFFF", bordercolor=PALETTE["bg"])
     return style
-
 
 # =======================
 #      VENTANA UI
@@ -226,44 +205,48 @@ def open_reco_window(emotion: str, recos: dict):
         _set_text(label_widget, _label_of(item))
 
     def _card(parent):
-        # wrapper para dar sombra exterior
         pad = ttk.Frame(parent, style="CardPad.TFrame")
         pad.pack(fill="x", pady=10)
-        # sombra (canvas)
         shadow = tk.Canvas(pad, height=6, highlightthickness=0, bg=PALETTE["bg"])
         shadow.pack(fill="x")
-        # tarjeta real
         card = ttk.Frame(pad, style="Card.TFrame")
         card.pack(fill="x")
         return card
+
+    def _adjust_wrap(label: ttk.Label, row: ttk.Frame, btns: ttk.Frame, min_wrap=260, pad=36):
+        """
+        Ajusta wraplength = ancho_disponible_en_row - ancho_botones - padding
+        para que el texto nunca se meta debajo de los botones.
+        """
+        row.update_idletasks()
+        btns.update_idletasks()
+        row_w = row.winfo_width()
+        btn_w = btns.winfo_width() or btns.winfo_reqwidth()
+        wrap = max(min_wrap, row_w - btn_w - pad)
+        label.configure(wraplength=wrap)
 
     def build_card(title_text, items, key, open_url_fn, primary_text):
         card = _card(scroll_frame)
         card.grid_columnconfigure(0, weight=1)
 
-        # título
         ttk.Label(card, text=title_text, style="H2.TLabel").grid(row=0, column=0, sticky="w", padx=20, pady=(16, 6))
 
-        # contenido
         row = ttk.Frame(card, style="Card.TFrame")
         row.grid(row=1, column=0, sticky="ew", padx=20, pady=(0, 20))
         row.grid_columnconfigure(0, weight=1)
 
-        label = ttk.Label(row, text="", style="Body.TLabel")
+        label = ttk.Label(row, text="", style="Body.TLabel", justify="left")
         label.grid(row=0, column=0, sticky="w")
 
-        # botones a la derecha
         btns = ttk.Frame(row, style="Card.TFrame")
         btns.grid(row=0, column=1, sticky="e", padx=(16, 0))
 
-        # Botón "Otro" (secundario)
         RoundedButton(btns, text="⟳  Otro",
                       command=lambda: _next(items, key, label),
                       fill=PALETTE["btn_sec"], hover_fill=PALETTE["btn_sec_h"],
                       container_bg=PALETTE["card"],
                       font=("Segoe UI", 12, "bold")).pack(side="left", padx=(0, 12))
 
-        # Botón principal (Reproducir / Tráiler / Ver guía)
         RoundedButton(btns, text=f"▶  {primary_text}",
                       command=lambda: (webbrowser.open(open_url_fn(_current(items, key))) if items else None),
                       fill=PALETTE["btn_pri"], hover_fill=PALETTE["btn_pri_h"],
@@ -272,6 +255,9 @@ def open_reco_window(emotion: str, recos: dict):
 
         # inicializar texto
         _set_text(label, _label_of(_current(items, key)) if items else "")
+
+        # 🔧 Ajuste dinámico del wraplength para que NO quede debajo de los botones
+        row.bind("<Configure>", lambda e: _adjust_wrap(label, row, btns))
 
     # ======= Tarjetas =======
     build_card("Música",      music_list,  "music",      _url_music,    "Reproducir")

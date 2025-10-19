@@ -26,9 +26,8 @@ ICON_MAP = {
 }
 
 # Coordenadas (x, y, w, h) **sobre la imagen de fondo**
-# AJÚSTALAS a tu plantilla.
-CAMERA_REGION = (50, 210, 780, 700)     # rectángulo grande blanco (cámara)
-EMO_REGION    = (917, 335, 280, 365)   # rectángulo pequeño blanco (icono de emoción)
+CAMERA_REGION = (50, 210, 780, 500)   # rectángulo grande blanco (cámara)
+EMO_REGION    = (917, 335, 280, 365)  # rectángulo pequeño blanco (icono de emoción)
 
 # ------------------- DIBUJO DE TEXTO -------------------
 def _find_font():
@@ -44,16 +43,13 @@ def _find_font():
     return None
 
 def draw_text_utf8(img_bgr, text, pos, font_size=30, color=(20, 20, 20), anchor="lt"):
-    """
-    Dibuja texto UTF-8 con Pillow. anchor: 'lt' (left-top), 'mm' (center).
-    """
+    """Dibuja texto UTF-8 con Pillow. anchor: 'lt' (left-top), 'mm' (center)."""
     img_pil = Image.fromarray(cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB))
     draw = ImageDraw.Draw(img_pil)
     fp = _find_font()
     font = ImageFont.truetype(fp, font_size) if fp else ImageFont.load_default()
     color_rgb = (int(color[2]), int(color[1]), int(color[0]))
     if anchor == "mm":
-        # aproximación de centrado
         text_w = draw.textlength(text, font=font)
         text_h = font.size
         pos = (pos[0] - text_w / 2, pos[1] - text_h / 2)
@@ -62,10 +58,7 @@ def draw_text_utf8(img_bgr, text, pos, font_size=30, color=(20, 20, 20), anchor=
 
 # ------------------- UTILIDADES DE LAYOUT -------------------
 def fit_into(src_bgr, dst_wh):
-    """
-    Reescala src_bgr para caber dentro de dst_wh (w,h) manteniendo aspecto.
-    Devuelve imagen con posibles bordes (negro) para completar.
-    """
+    """Reescala src_bgr para caber dentro de dst_wh (w,h) manteniendo aspecto."""
     dst_w, dst_h = dst_wh
     sh, sw = src_bgr.shape[:2]
     scale = min(dst_w / sw, dst_h / sh) if sw > 0 and sh > 0 else 1.0
@@ -76,6 +69,22 @@ def fit_into(src_bgr, dst_wh):
     y0 = (dst_h - new_h) // 2
     canvas[y0:y0+new_h, x0:x0+new_w] = resized
     return canvas
+
+def fit_into_info(src_bgr, dst_wh):
+    """
+    Igual que fit_into pero también devuelve (x0, y0, scale, new_w, new_h)
+    para poder mapear coordenadas (ej. rectángulos de rostro).
+    """
+    dst_w, dst_h = dst_wh
+    sh, sw = src_bgr.shape[:2]
+    scale = min(dst_w / sw, dst_h / sh) if sw > 0 and sh > 0 else 1.0
+    new_w, new_h = max(1, int(sw * scale)), max(1, int(sh * scale))
+    resized = cv2.resize(src_bgr, (new_w, new_h), interpolation=cv2.INTER_AREA)
+    canvas = np.zeros((dst_h, dst_w, 3), dtype=np.uint8)
+    x0 = (dst_w - new_w) // 2
+    y0 = (dst_h - new_h) // 2
+    canvas[y0:y0+new_h, x0:x0+new_w] = resized
+    return canvas, x0, y0, scale, new_w, new_h
 
 def paste_region(bg_bgr, content_bgr, region_xywh):
     """
@@ -149,9 +158,20 @@ if __name__ == "__main__":
             # Clonar fondo (canvas base)
             canvas = bg0.copy()
 
-            # Detectar rostros y emoción
+            # Detectar rostros
             boxes = fd.detect(frame)
-            emo = ec.predict(frame, face_boxes=boxes)
+
+            # --- Elegir SOLO UN rostro (el más grande) para evitar conflictos ---
+            main_box = None
+            if boxes:
+                areas = [(x2-x1)*(y2-y1) for (x1,y1,x2,y2) in boxes]
+                main_box = boxes[int(np.argmax(areas))]
+                boxes_for_emotion = [main_box]  # solo 1
+            else:
+                boxes_for_emotion = []
+
+            # Predicción de emoción usando SOLO el rostro principal
+            emo = ec.predict(frame, face_boxes=boxes_for_emotion)
 
             # Si cambia la emoción → refresca recomendaciones (para la ventana secundaria)
             if emo != last_emotion:
@@ -159,8 +179,29 @@ if __name__ == "__main__":
                 last_emotion = emo
                 last_change_ts = time.time()
 
-            # 1) Cámara en su región (con ajuste de tamaño y clipping)
-            canvas = paste_region(canvas, frame, CAMERA_REGION)
+            # 1) Preparar frame para región de cámara y dibujar el recuadro ahí (mapeando coords)
+            x_cam, y_cam, w_cam, h_cam = CAMERA_REGION
+            frame_fit, off_x, off_y, scale, new_w, new_h = fit_into_info(frame, (w_cam, h_cam))
+
+            # Dibujar el rectángulo SOLO si hay rostro principal
+            if main_box is not None:
+                x1, y1, x2, y2 = main_box
+                # escalar y desplazar al espacio de frame_fit (w_cam x h_cam)
+                rx1 = int(off_x + x1 * scale)
+                ry1 = int(off_y + y1 * scale)
+                rx2 = int(off_x + x2 * scale)
+                ry2 = int(off_y + y2 * scale)
+                # clamp a límites del frame_fit
+                rx1, ry1 = max(0, rx1), max(0, ry1)
+                rx2, ry2 = min(w_cam-1, rx2), min(h_cam-1, ry2)
+                cv2.rectangle(frame_fit, (rx1, ry1), (rx2, ry2), (0, 255, 0), 2)
+
+            # Pegar el frame (con recuadro dibujado) en el canvas
+            # (como ya está en el tamaño exacto de la región, no se deforma)
+            x2, y2 = min(x_cam + w_cam, canvas.shape[1]), min(y_cam + h_cam, canvas.shape[0])
+            w_real, h_real = x2 - x_cam, y2 - y_cam
+            if w_real > 0 and h_real > 0:
+                canvas[y_cam:y_cam+h_real, x_cam:x_cam+w_real] = frame_fit[:h_real, :w_real]
 
             # 2) Icono/texto de emoción en su región (robusto a límites)
             if emo not in icon_cache:
@@ -191,7 +232,7 @@ if __name__ == "__main__":
 
             # Apertura automática si emoción estable y hay rostro
             now = time.time()
-            if (now - last_change_ts) >= STABLE_SEC and (now - last_window_ts) >= COOLDOWN_SEC and len(boxes) > 0:
+            if (now - last_change_ts) >= STABLE_SEC and (now - last_window_ts) >= COOLDOWN_SEC and main_box is not None:
                 open_reco_window(emo, recos_cache)
                 last_window_ts = time.time()
 
