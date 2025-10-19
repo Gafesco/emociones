@@ -1,0 +1,122 @@
+{
+"feliz": {
+  "music": [
+  {"label": "Happy", "url": "https://open.spotify.com/track/60nZcImufyMA1MKQY3dcCH?si=e3c86fe20b4a4599"},
+  {"label": "Uptown Funk", "url": "https://open.spotify.com/track/32OlwWuMpZ6b0aN2RZOeMS?si=b005da0c96564cab"},
+  {"label": "Can't Stop the Feeling!", "url": "https://open.spotify.com/track/1WkMMavIMc4JZ8cfMmxHkI?si=f99965ec54904b64"}
+]
+,
+  "movies": [
+    {
+      "label": "Son como niños (tráiler)",
+      "url": "https://www.youtube.com/watch?v=EJlI-peYPVs"
+    },
+    {
+      "label": "Ratatouille (tráiler)",
+      "url": "https://www.youtube.com/watch?v=NgsQ8mVkN8w"
+    },
+    {
+      "label": "Cars (tráiler)",
+      "url": "https://www.youtube.com/watch?v=W_H7_tDHFE8"
+    }
+  ],
+"activities": [
+  "Anotar tres cosas por las que te sientas agradecido hoy",
+  "Compartir un momento alegre con alguien",
+  "Escuchar tu canción favorita mientras caminas o bailas libremente"
+]
+
+}
+,
+  "triste": {
+  "music": [
+    { "label": "Coldplay - Fix You", "url": "https://open.spotify.com/track/7LVHVU3tWfcxj5aiPFEW4Q?si=72ad277ed80145ce" },
+    { "label": "Don't Stop Me Now", "url": "https://open.spotify.com/track/7hQJA50XrCWABAu5v6QZ4i?si=3de8dc7d67ef4f7b" },
+    { "label": "Viva la vida ", "url": "https://open.spotify.com/track/1mea3bSkSGXuIRvnydlB5b?si=2bd5483389454b8d" }
+  ],
+  "movies": [
+    { "label": "En busca de la felicidad (tráiler)",
+      "url": "https://www.youtube.com/watch?v=rxtGMH7OrLc" },
+    { "label": "Billy Elliot (tráiler)", "url": "https://www.youtube.com/watch?v=glKDtUXNAZw" },
+    { "label": "Mentes peligrosas (tráiler)", "url": "https://www.youtube.com/watch?v=e-_nWLGdIT0" }
+  ],
+"activities": [
+  "Ver una película o video que te reconforte y te haga sonreír",
+  "Escribir tus pensamientos sin juzgarte durante 10 minutos",
+  "Tomar una ducha tibia o una bebida caliente con calma"
+]
+
+},
+"enojado": {
+  "music": [
+    { "label": "They Don't Care About Us", "url": "https://open.spotify.com/track/3wuCCNCnBhJlwkIJTBZFiv?si=65e14ec02d064a08" },
+    { "label": "Lose Yourself", "url": "https://open.spotify.com/track/5Z01UMMf7V1o0MzF86s6WJ?si=18db979979594ac8" },
+    { "label": "November Rain", "url": "https://open.spotify.com/track/3YRCqOhFifThpSRFJ1VWFM?si=bf8cf6d0b7d24f7f"  }
+  ],
+  "movies": [
+    { "label": "El francotirador (tráiler)", "url": "https://www.youtube.com/watch?v=7_M1lbjlv-o" },
+    { "label": "Hobbs & Shaw (tráiler)", "url": "http://youtube.com/watch?v=HZ7PAyCDwEg" },
+    { "label": "Bailarina (trailer)", "url": "https://www.youtube.com/watch?v=krxNyEkdkgM" }
+  ],
+"activities": [
+  "Hacer respiraciones profundas 4-7-8 durante 3 minutos",
+  "Hacer actividad física intensa por 5 minutos (flexiones, saltos o sentadillas)",
+  "Escribir lo que te molestó y luego anotar una acción constructiva para solucionarlo"
+]
+
+},
+"sorprendido": {
+  "music": [
+    { "label": "Break free", "url": "https://open.spotify.com/track/12KUFSHFgT0XCoiSlvdQi4?si=a5b44324be424f2a" },
+    { "label": "Light it up", "url": "https://open.spotify.com/track/1qFSPn37zEeCyRiVpkW9dt?si=f2951f53321d41a0" },
+    { "label": "fireball", "url": "https://open.spotify.com/track/4Y7XAxTANhu3lmnLAzhWJW?si=17ab91dfef70450c" }
+  ],
+  "movies": [
+    { "label": "Origen (tráiler)", "url": "https://www.youtube.com/watch?v=RV9L7ui9Cn8" },
+    { "label": "Decifrando enigma (tráiler)", "url": "https://www.youtube.com/watch?v=zXKHGaRxQaE" },
+    { "label": "El pianista (tráiler)", "url": "https://www.youtube.com/watch?v=qDexUwamV9I" }
+  ],
+"activities": [
+  "Tomarte 2 minutos para respirar y observar tu entorno con calma",
+  "Anotar una cosa nueva que aprendiste o que te inspiró hoy",
+  "Explorar un tema o video sobre algo que te despierte curiosidad"
+]
+
+},
+"asustado": {
+  "music": [
+    { "label": "Not Afraid", "url": "https://open.spotify.com/track/7Ie9W94M7OjPoZVV216Xus?si=75dce7f2b5574b3f" },
+    { "label": "Reload", "url": "https://open.spotify.com/track/5jyUBKpmaH670zrXrE0wmO?si=d1cd8be645bf4a41" },
+    { "label": "High on life", "url": "https://open.spotify.com/track/4ut5G4rgB1ClpMTMfjoIuy?si=5af3e3478cfa41df" }
+  ],
+  "movies": [
+    { "label": "Los extraños (tráiler)", "url": "https://www.youtube.com/watch?v=BbqELQHpmQM" },
+    { "label": "Black Friday (tráiler)", "url": "https://www.youtube.com/watch?v=mQxbZubEv3A" },
+    { "label": "Buscando a nemo (tráiler)", "url": "https://www.youtube.com/watch?v=ba4TwyaNhSQ" }
+  ],
+"activities": [
+  "Practicar la técnica de 'grounding' 5-4-3-2-1 (nombra 5 cosas que ves, 4 que sientes, 3 que oyes...)",
+  "Hacer respiraciones profundas con pausas largas (4 seg inhalar, 7 mantener, 8 exhalar)",
+  "Hablar con alguien de confianza o escuchar una voz tranquilizadora"
+]
+
+},
+"neutral": {
+  "music": [
+    { "label": "Wake me Up (Spotify)", "url": "https://open.spotify.com/track/0nrRP2bk19rLc0orkWPQk2?si=eec511e70b88467e" },
+    { "label": "Firestone", "url": "https://open.spotify.com/track/1I8tHoNBFTuoJAlh4hfVVE?si=48fe4b6b8f184d72" },
+    { "label": "Cold Water", "url": "https://open.spotify.com/track/7zsXy7vlHdItvUSH8EwQss?si=983e36c1753742d4" }
+  ],
+  "movies": [
+    { "label": "Uncharted (tráiler)", "url": "https://www.youtube.com/watch?v=eHp3MbsCbMg" },
+    { "label": "Five Nights At Freddy´s (tráiler)", "url": "https://www.youtube.com/watch?v=0VH9WCFV6XQ" },
+    { "label": "Black Phone (tráiler)", "url": "https://www.youtube.com/watch?v=XhcEnHDKHco" }
+  ],
+"activities": [
+  "Organizar tu espacio o escritorio por 5 minutos",
+  "Realizar una pausa activa con estiramientos suaves",
+  "Planificar una meta simple para hoy y completarla"
+]
+
+}
+}

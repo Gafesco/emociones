@@ -1,0 +1,8 @@
+opencv-python==4.8.1.78
+deepface==0.0.93
+numpy==1.26.4
+pillow==10.3.0
+tensorflow==2.12.0
+keras==2.12.0
+tf-keras
+protobuf==3.20.3
