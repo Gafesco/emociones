@@ -1,4 +1,3 @@
-# emotion.py
 import os, time, cv2, numpy as np
 from deepface import DeepFace
 

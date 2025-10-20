@@ -1,4 +1,3 @@
-# auth.py
 import tkinter as tk
 from tkinter import ttk, messagebox
 import cv2
@@ -22,7 +21,7 @@ PALETTE = {
 }
 
 SAMPLES_REQUIRED = 5
-THRESHOLD = 0.40  # ajústalo tras pruebas
+THRESHOLD = 0.40
 
 class AuthWindow(tk.Tk):
     def __init__(self):
@@ -35,6 +34,9 @@ class AuthWindow(tk.Tk):
         # cámara y detector
         self.vs = VideoStream(width=960, height=540)
         self.fd = FaceDetector()
+
+        # controlar after() para evitar "invalid command name"
+        self._after_id = None
 
         # UI
         self._build_ui()
@@ -50,6 +52,14 @@ class AuthWindow(tk.Tk):
         self.result_username = None  # se setea al hacer login OK
 
     def destroy(self):
+        # cancelar refresco de cámara antes de destruir
+        try:
+            if self._after_id is not None:
+                self.after_cancel(self._after_id)
+                self._after_id = None
+        except Exception:
+            pass
+        # soltar cámara
         try:
             self.vs.release()
         except Exception:
@@ -59,8 +69,10 @@ class AuthWindow(tk.Tk):
     # ---------- UI ----------
     def _build_ui(self):
         style = ttk.Style()
-        try: style.theme_use("clam")
-        except Exception: pass
+        try:
+            style.theme_use("clam")
+        except Exception:
+            pass
 
         style.configure("TFrame", background=PALETTE["bg"])
         style.configure("Card.TFrame", background=PALETTE["card"])
@@ -72,18 +84,19 @@ class AuthWindow(tk.Tk):
 
         left = ttk.Frame(self, style="TFrame")
         right = ttk.Frame(self, style="TFrame")
-        left.pack(side="left", fill="both", expand=True, padx=(16,8), pady=16)
-        right.pack(side="right", fill="y", padx=(8,16), pady=16)
+        left.pack(side="left", fill="both", expand=True, padx=(16, 8), pady=16)
+        right.pack(side="right", fill="y", padx=(8, 16), pady=16)
 
         # Video card
         video_card = ttk.Frame(left, style="Card.TFrame")
         video_card.pack(fill="both", expand=True)
-        ttk.Label(video_card, text="Coloca tu rostro frente a la cámara", style="Heading.TLabel").pack(anchor="w", padx=12, pady=(12,6))
+        ttk.Label(video_card, text="Coloca tu rostro frente a la cámara", style="Heading.TLabel")\
+            .pack(anchor="w", padx=12, pady=(12, 6))
         self.video_label = ttk.Label(video_card)
-        self.video_label.pack(fill="both", expand=True, padx=12, pady=(0,12))
+        self.video_label.pack(fill="both", expand=True, padx=12, pady=(0, 12))
 
         # Tabs (Login / Registrar)
-        ttk.Label(right, text="Acceso al sistema", style="Title.TLabel").pack(anchor="w", pady=(0,10))
+        ttk.Label(right, text="Acceso al sistema", style="Title.TLabel").pack(anchor="w", pady=(0, 10))
         nb = ttk.Notebook(right)
         nb.pack(fill="both", expand=True)
 
@@ -91,12 +104,12 @@ class AuthWindow(tk.Tk):
         login_tab = ttk.Frame(nb, style="Card.TFrame")
         nb.add(login_tab, text="Iniciar sesión")
 
-        ttk.Label(login_tab, text="Usuario", style="TLabel").pack(anchor="w", padx=12, pady=(12,4))
+        ttk.Label(login_tab, text="Usuario", style="TLabel").pack(anchor="w", padx=12, pady=(12, 4))
         self.login_user = ttk.Entry(login_tab, width=26)
-        self.login_user.pack(padx=12, pady=(0,8))
+        self.login_user.pack(padx=12, pady=(0, 8))
 
         self.login_status = ttk.Label(login_tab, text="", style="TLabel")
-        self.login_status.pack(anchor="w", padx=12, pady=(4,8))
+        self.login_status.pack(anchor="w", padx=12, pady=(4, 8))
 
         ttk.Button(login_tab, text="Iniciar con rostro", command=self._do_login).pack(padx=12, pady=10)
 
@@ -104,41 +117,49 @@ class AuthWindow(tk.Tk):
         reg_tab = ttk.Frame(nb, style="Card.TFrame")
         nb.add(reg_tab, text="Crear cuenta")
 
-        ttk.Label(reg_tab, text="Nuevo usuario", style="TLabel").pack(anchor="w", padx=12, pady=(12,4))
+        ttk.Label(reg_tab, text="Nuevo usuario", style="TLabel").pack(anchor="w", padx=12, pady=(12, 4))
         self.reg_user = ttk.Entry(reg_tab, width=26)
-        self.reg_user.pack(padx=12, pady=(0,8))
+        self.reg_user.pack(padx=12, pady=(0, 8))
 
         self.reg_status = ttk.Label(reg_tab, text="Capturas: 0 / " + str(SAMPLES_REQUIRED), style="TLabel")
-        self.reg_status.pack(anchor="w", padx=12, pady=(4,6))
+        self.reg_status.pack(anchor="w", padx=12, pady=(4, 6))
 
-        ttk.Button(reg_tab, text="Capturar muestra", command=self._capture_sample).pack(padx=12, pady=(4,6))
-        ttk.Button(reg_tab, text="Guardar registro", command=self._save_registration).pack(padx=12, pady=(4,10))
+        ttk.Button(reg_tab, text="Capturar muestra", command=self._capture_sample).pack(padx=12, pady=(4, 6))
+        ttk.Button(reg_tab, text="Guardar registro", command=self._save_registration).pack(padx=12, pady=(4, 10))
 
-        ttk.Label(reg_tab, text="Mira al Frente",
-                  style="TLabel").pack(anchor="w", padx=12, pady=(0,12))
+        ttk.Label(reg_tab, text="Mira al frente", style="TLabel").pack(anchor="w", padx=12, pady=(0, 12))
 
         # Footer
-        ttk.Label(self, text="Requiere usuario + rostro. Si falla, verifica luz, encuadre y vuelve a intentar.",
-                  style="Title.TLabel").pack(side="bottom", pady=(0,8))
+        ttk.Label(self,
+                  text="Requiere usuario + rostro. Si falla, verifica luz, encuadre y vuelve a intentar.",
+                  style="Title.TLabel").pack(side="bottom", pady=(0, 8))
 
     # ---------- Cámara ----------
     def _update_video(self):
+        if not self.winfo_exists():
+            return
+
         ok, frame = self.vs.read()
         if ok:
-            # dibujar rostro (el más grande)
+            # dibujar rostro
             boxes = self.fd.detect(frame)
             if boxes:
-                areas = [ (x2-x1)*(y2-y1) for (x1,y1,x2,y2) in boxes ]
-                x1,y1,x2,y2 = boxes[int(np.argmax(areas))]
-                cv2.rectangle(frame, (x1,y1), (x2,y2), (0,255,0), 2)
+                areas = [(x2 - x1) * (y2 - y1) for (x1, y1, x2, y2) in boxes]
+                x1, y1, x2, y2 = boxes[int(np.argmax(areas))]
+                cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
             # convertir a ImageTk
             rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             img = Image.fromarray(rgb)
             imgtk = ImageTk.PhotoImage(image=img)
-            self.video_label.imgtk = imgtk
-            self.video_label.configure(image=imgtk)
+            # proteger si el label ya no existe
+            if self.video_label.winfo_exists():
+                self.video_label.imgtk = imgtk
+                self.video_label.configure(image=imgtk)
             self._frame = frame
-        self.after(20, self._update_video)
+
+        # reprogramar solo si la ventana sigue activa
+        if self.winfo_exists():
+            self._after_id = self.after(20, self._update_video)
 
     # ---------- Lógica ----------
     def _get_current_embedding(self):
@@ -163,10 +184,12 @@ class AuthWindow(tk.Tk):
         if ok:
             self.login_status.configure(text="Acceso correcto", foreground=PALETTE["ok"])
             self.result_username = username
-            self.after(700, self.destroy)  # le da un poco más de tiempo (0.7 seg)
+            self.after(700, self.destroy)  # breve pausa para que se vea el mensaje
         else:
-            self.login_status.configure(text=f"Rostro no coincide (dist={dist:.3f}). Intenta de nuevo.",
-                                        foreground=PALETTE["err"])
+            self.login_status.configure(
+                text=f"Rostro no coincide (dist={dist:.3f}). Intenta de nuevo.",
+                foreground=PALETTE["err"]
+            )
 
     def _capture_sample(self):
         username = self.reg_user.get().strip()
@@ -178,11 +201,13 @@ class AuthWindow(tk.Tk):
             return
         emb = self._get_current_embedding()
         if emb is None:
-            self.reg_status.configure(text="No se detectó rostro. Intenta acercarte o mejora la luz.", foreground=PALETTE["warn"])
+            self.reg_status.configure(text="No se detectó rostro. Intenta acercarte o mejora la luz.",
+                                      foreground=PALETTE["warn"])
             return
         self.samples.append(emb)
         self.sample_count += 1
-        self.reg_status.configure(text=f"Capturas: {self.sample_count} / {SAMPLES_REQUIRED}", foreground=PALETTE["text"])
+        self.reg_status.configure(text=f"Capturas: {self.sample_count} / {SAMPLES_REQUIRED}",
+                                  foreground=PALETTE["text"])
 
     def _save_registration(self):
         username = self.reg_user.get().strip()
@@ -190,7 +215,8 @@ class AuthWindow(tk.Tk):
             messagebox.showerror("Error", "Ingresa un usuario para registrar.")
             return
         if self.sample_count < SAMPLES_REQUIRED:
-            messagebox.showerror("Incompleto", f"Necesitas al menos {SAMPLES_REQUIRED} capturas. Lleva {self.sample_count}.")
+            messagebox.showerror("Incompleto",
+                                 f"Necesitas al menos {SAMPLES_REQUIRED} capturas. Lleva {self.sample_count}.")
             return
         mean_emb = enroll_average(self.samples)
         if mean_emb is None:
@@ -204,10 +230,7 @@ class AuthWindow(tk.Tk):
         self.reg_status.configure(text=f"Capturas: 0 / {SAMPLES_REQUIRED}", foreground=PALETTE["text"])
 
 def run_auth() -> str | None:
-    """
-    Abre la ventana de autenticación.
-    Devuelve el nombre de usuario si el login fue exitoso; None en otro caso.
-    """
+
     app = AuthWindow()
     app.mainloop()
     return app.result_username

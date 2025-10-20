@@ -1,14 +1,10 @@
-# ui.py
 import tkinter as tk
 from tkinter import ttk
 import webbrowser
 import urllib.parse
 
-# =======================
-#    PALETA DE COLORES
-# =======================
 PALETTE = {
-    "bg":         "#0E1A2B",   # fondo app (azul muy oscuro)
+    "bg":         "#0E1A2B",   # fondo app
     "card":       "#12233A",   # tarjeta/sección
     "shadow":     "#0A1422",   # sombra sutil
     "accent":     "#2E6AF2",   # azul principal (header)
@@ -22,9 +18,6 @@ PALETTE = {
     "btn_sec_h":  "#214171",
 }
 
-# =======================
-#     UTILIDADES WEB
-# =======================
 YOUTUBE_SEARCH = "https://www.youtube.com/results?search_query="
 GOOGLE_SEARCH  = "https://www.google.com/search?q="
 
@@ -54,9 +47,7 @@ def _url_activity(item):
         return item["url"]
     return _gg_url(_label_of(item))
 
-# =======================
-#  BOTÓN REDONDEADO (Canvas)
-# =======================
+
 class RoundedButton(tk.Canvas):
     def __init__(self, master, text, command=None,
                  fill=PALETTE["btn_pri"], hover_fill=PALETTE["btn_pri_h"],
@@ -108,9 +99,7 @@ class RoundedButton(tk.Canvas):
         if callable(self.command):
             self.command()
 
-# =======================
-#       ESTILOS TTK
-# =======================
+
 def _init_styles():
     style = ttk.Style()
     try:
@@ -140,9 +129,7 @@ def _init_styles():
                     arrowcolor="#FFFFFF", bordercolor=PALETTE["bg"])
     return style
 
-# =======================
-#      VENTANA UI
-# =======================
+
 def open_reco_window(emotion: str, recos: dict):
     music_list  = list(recos.get("music", []))
     movies_list = list(recos.get("movies", []))
@@ -157,7 +144,7 @@ def open_reco_window(emotion: str, recos: dict):
 
     _init_styles()
 
-    # ======= Header (centrado) =======
+    # ======= Header  =======
     header = ttk.Frame(root, style="Header.TFrame")
     header.pack(fill="x")
     header.grid_columnconfigure(0, weight=1)
@@ -214,10 +201,7 @@ def open_reco_window(emotion: str, recos: dict):
         return card
 
     def _adjust_wrap(label: ttk.Label, row: ttk.Frame, btns: ttk.Frame, min_wrap=260, pad=36):
-        """
-        Ajusta wraplength = ancho_disponible_en_row - ancho_botones - padding
-        para que el texto nunca se meta debajo de los botones.
-        """
+
         row.update_idletasks()
         btns.update_idletasks()
         row_w = row.winfo_width()
@@ -256,7 +240,6 @@ def open_reco_window(emotion: str, recos: dict):
         # inicializar texto
         _set_text(label, _label_of(_current(items, key)) if items else "")
 
-        # 🔧 Ajuste dinámico del wraplength para que NO quede debajo de los botones
         row.bind("<Configure>", lambda e: _adjust_wrap(label, row, btns))
 
     # ======= Tarjetas =======

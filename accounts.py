@@ -1,4 +1,3 @@
-# accounts.py
 import os
 import json
 import numpy as np
@@ -19,10 +18,6 @@ def _ensure_dirs_and_file():
 
 
 def _safe_read_json(path: str) -> Dict[str, Any]:
-    """
-    Lee JSON de forma robusta. Si hay error de parseo o estructura inválida,
-    repara el archivo y devuelve DEFAULT_DB.
-    """
     _ensure_dirs_and_file()
     try:
         with open(path, "r", encoding="utf-8") as f:
@@ -36,10 +31,8 @@ def _safe_read_json(path: str) -> Dict[str, Any]:
             json.dump(DEFAULT_DB, f, ensure_ascii=False, indent=2)
         return DEFAULT_DB.copy()
 
-
 def load_users() -> Dict[str, Any]:
     return _safe_read_json(USERS_PATH)
-
 
 def save_users(data: Dict[str, Any]):
     os.makedirs(DATA_DIR, exist_ok=True)
@@ -48,7 +41,6 @@ def save_users(data: Dict[str, Any]):
     with open(tmp_path, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
     os.replace(tmp_path, USERS_PATH)
-
 
 def get_user_embedding(username: str):
     db = load_users()
@@ -60,14 +52,12 @@ def get_user_embedding(username: str):
         return None
     return np.array(vec, dtype=np.float32)
 
-
 def set_user_embedding(username: str, embedding):
     db = load_users()
     if "users" not in db or not isinstance(db["users"], dict):
         db = DEFAULT_DB.copy()
     db["users"][username] = {"embedding": np.asarray(embedding, dtype=float).tolist()}
     save_users(db)
-
 
 def user_exists(username: str) -> bool:
     db = load_users()

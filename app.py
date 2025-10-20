@@ -1,4 +1,3 @@
-# app.py
 import os
 import time
 import cv2
@@ -9,11 +8,11 @@ from camera import VideoStream
 from emotion import FaceDetector, EmotionClassifierDeepFace
 from reco_engine import RecoEngine
 from ui import open_reco_window
-from auth import run_auth  # <<<<<<<< AÑADIDO
+from auth import run_auth
 
 # ------------------- CONFIG -------------------
 ASSETS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "assets")
-BG_PATH    = os.path.join(ASSETS_DIR, "ui_bg.jpg")   # tu fondo
+BG_PATH    = os.path.join(ASSETS_DIR, "ui_bg.jpg")
 ICONS_DIR  = os.path.join(ASSETS_DIR, "icons")
 
 ICON_MAP = {
@@ -107,10 +106,9 @@ def load_icon_for(emotion):
     return img
 
 if __name__ == "__main__":
-    # ---------- Paso 0: LOGIN facial + usuario ----------
+
     username = run_auth()
     if not username:
-        # Cerró la ventana o falló login
         raise SystemExit(0)
 
     # ---------- Fondo y módulos ----------

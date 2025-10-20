@@ -1,4 +1,3 @@
-# reco_engine.py
 import json, os, random
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -12,10 +11,7 @@ class RecoEngine:
             self.data = json.load(f)
 
     def get(self, emotion: str, k: int | None = None):
-        """
-        Si k es None -> devuelve TODAS las recomendaciones, barajadas.
-        Si k es un entero -> devuelve hasta k por categoría (barajadas).
-        """
+
         emo = emotion if emotion in self.data else "neutral"
         pack = self.data.get(emo, {})
         out = {}

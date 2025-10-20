@@ -1,9 +1,7 @@
-# camera.py
 import cv2
 
 class VideoStream:
     def __init__(self, src=0, width=640, height=480):
-        # En Windows usar CAP_DSHOW reduce latencia en varias webcams
         self.cap = cv2.VideoCapture(src, cv2.CAP_DSHOW)
         if width and height:
             self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
